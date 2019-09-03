@@ -17,7 +17,7 @@ package com.google.ads.mediation.unity;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.Keep;
+import android.support.annotation.Keep;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -268,13 +268,11 @@ public class UnityAdapter extends UnityMediationAdapter
         mActivityWeakReference = new WeakReference<>((Activity) context);
 
         // Check if the Unity Ads initialized successfully.
-        if (UnityAds.isInitialized()) {
-            // Unity Ads initialized successfully, request UnitySingleton to load an ad.
-            UnitySingleton.loadAd(mUnityAdapterDelegate);
-        } else {
+        if (!UnityAds.isInitialized()) {
             UnitySingleton.initializeUnityAds(mUnityAdapterDelegate,
                     (Activity) context, gameId, mPlacementId);
         }
+        UnitySingleton.loadAd(mUnityAdapterDelegate);
     }
 
     @Override

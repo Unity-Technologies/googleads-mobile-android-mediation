@@ -228,13 +228,12 @@ public class UnityMediationAdapter extends Adapter
 
         mMediationAdLoadCallback = mediationAdLoadCallback;
 
-        if (UnityAds.isInitialized()) {
-            // Request UnitySingleton to load ads for mPlacementId.
-            UnitySingleton.loadAd(mUnityAdapterRewardedAdDelegate);
-        } else {
+        // Check if the Unity Ads initialized successfully.
+        if (!UnityAds.isInitialized()) {
             UnitySingleton.initializeUnityAds(mUnityAdapterRewardedAdDelegate,
                     (Activity) context, gameID, mPlacementId);
         }
+        UnitySingleton.loadAd(mUnityAdapterRewardedAdDelegate);
     }
 
     @Override

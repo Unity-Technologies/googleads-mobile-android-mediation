@@ -15,7 +15,7 @@
 package com.google.ads.mediation.unity;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -40,7 +40,7 @@ public final class UnitySingleton {
      */
     private static HashMap<String, WeakReference<UnityAdapterDelegate>> mPlacementsInUse =
             new HashMap<>();
-
+    private static HashMap<String, UnityAds.PlacementState> mPlacementStates = new HashMap<>();
     /**
      * A weak reference to the {@link UnityAdapterDelegate} of the {@link UnityAdapter} that is
      * currently displaying an ad.
@@ -160,27 +160,50 @@ public final class UnitySingleton {
      */
     protected static void loadAd(UnityAdapterDelegate delegate) {
 
-        // Calling load before UnityAds.inititalize() will cause the placement to load on init
-        UnityAds.load(delegate.getPlacementId());
+        // Unity ads added a load method in v3.2, but the game ID must be whitelisted to use load API.
+        // If game is not whitelisted, all ad placements begin load when initialize is called (like v3.0).
+        // If Unity Ads is initialized, we call the appropriate callbacks by checking the isReady
+        // method. If ads are currently being loaded, wait for the callbacks from
+        // unitySingletonListenerInstance.
+        
+        // If at this point, UnityAds is not initialized, init again
+        String placementId = delegate.getPlacementId();
+        if(placementId == null){
+            delegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR, placementId);
+            return;
+        }
+        // Check if an AdMob Ad request has already loaded or is in progress of requesting
+        // an Ad from Unity Ads for a single placement, and fail if there's any.
+        if (mPlacementsInUse.containsKey(placementId) &&
+                mPlacementsInUse.get(placementId).get() != null) {
+            mPlacementsInUse.get(placementId).get().onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR,
+                    placementId);
+        }
 
+        mPlacementsInUse.put(placementId, new WeakReference<>(delegate));
         if (UnityAds.isInitialized()) {
-            //If ads are currently being loaded, wait for the callbacks from
-            // unitySingletonListenerInstance.
-            // Check if an AdMob Ad request has already loaded or is in progress of requesting
-            // an Ad from Unity Ads for a single placement, and fail if there's any.
-            if (mPlacementsInUse.containsKey(delegate.getPlacementId()) &&
-                    mPlacementsInUse.get(delegate.getPlacementId()).get() != null) {
-                Log.e(UnityMediationAdapter.TAG,
-                        "An ad is already loading for placement ID: " + delegate.getPlacementId());
-                delegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR,
-                        delegate.getPlacementId());
-                return;
-            }
+            UnityAds.load(placementId);
+        }
 
-            mPlacementsInUse.put(delegate.getPlacementId(), new WeakReference<>(delegate));
-            if (UnityAds.isReady(delegate.getPlacementId())) {
-                delegate.onUnityAdsReady(delegate.getPlacementId());
+        UnityAds.PlacementState placementState = mPlacementStates.get(placementId);
+        if(placementState != null){
+            switch (placementState){
+                case READY:
+                    //Log.d("UnityAdapter", "Ready");
+                    delegate.onUnityAdsReady(placementId);
+                    break;
+                case WAITING:
+                    //Log.d("UnityAdapter", "Waiting");
+                    break;
+                case NOT_AVAILABLE:
+                case DISABLED:
+                case NO_FILL:
+                default:
+                    //Log.d("UnityAdapter", "Some error");
+                    delegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR, placementId);
+                    break;
             }
+            mPlacementStates.remove(placementId);
         }
     }
 
@@ -246,6 +269,8 @@ public final class UnitySingleton {
          */
         @Override
         public void onUnityAdsReady(String placementId) {
+            Log.d("UnityAdapter", "Placement Ready: " + placementId);
+
             // Unity Ads is ready to show ads for the given placementId. Send ready callback to the
             // appropriate delegate.
             if (mPlacementsInUse.containsKey(placementId) &&
@@ -294,6 +319,35 @@ public final class UnitySingleton {
                                                     UnityAds.PlacementState newState) {
             // The onUnityAdsReady and onUnityAdsError callback methods are used to forward Unity
             // Ads SDK states to the adapters. No need to forward this callback to the adapters.
+            if (newState != oldState) {
+
+                mPlacementStates.put(placementId, newState);
+
+                UnityAdapterDelegate adapterDelegate = null;
+
+                if (mPlacementsInUse.containsKey(placementId) && mPlacementsInUse.get(placementId) != null) {
+                    adapterDelegate = mPlacementsInUse.get(placementId).get();
+                }
+                if (adapterDelegate != null) {
+                    switch (newState) {
+                        case READY:
+                            //Do nothing: unityAdReady callback will handle this
+                            break;
+                        case WAITING:
+                            // wait for unityAdsReady callback
+                            break;
+                        case NOT_AVAILABLE:
+                            adapterDelegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR, "Unity Ads Placement: " + placementId + " - Not Available");
+                        case DISABLED:
+                            adapterDelegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR, "Unity Ads Placement: " + placementId + " - Disabled");
+                        case NO_FILL:
+                            adapterDelegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR, "Unity Ads Placement: " + placementId + " - No Fill");
+                        default:
+                            adapterDelegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR, "Unity Ads Placement: " + placementId + " - Internal Error");
+                            break;
+                    }
+                }
+            }
         }
 
         @Override
@@ -311,6 +365,7 @@ public final class UnitySingleton {
 
         @Override
         public void onUnityAdsError(UnityAds.UnityAdsError unityAdsError, String placementId) {
+            Log.d("UnityAdapter", "Placement Error: " + placementId);
             // An error occurred with Unity Ads. Send error event to the appropriate delegate.
             if (mPlacementsInUse.containsKey(placementId) &&
                     mPlacementsInUse.get(placementId).get() != null) {
