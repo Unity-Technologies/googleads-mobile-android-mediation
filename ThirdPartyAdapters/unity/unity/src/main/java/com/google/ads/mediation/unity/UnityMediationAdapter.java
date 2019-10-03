@@ -13,9 +13,11 @@ import com.google.android.gms.ads.mediation.MediationConfiguration;
 import com.google.android.gms.ads.mediation.MediationRewardedAd;
 import com.google.android.gms.ads.mediation.MediationRewardedAdCallback;
 import com.google.android.gms.ads.mediation.MediationRewardedAdConfiguration;
+import com.google.android.gms.ads.mediation.OnContextChangedListener;
 import com.google.android.gms.ads.mediation.VersionInfo;
 import com.unity3d.ads.UnityAds;
 
+import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.List;
 
@@ -23,7 +25,8 @@ import java.util.List;
  * The {@link UnityMediationAdapter} is used to initialize the Unity Ads SDK, load rewarded
  * video ads from Unity ads and mediate the callbacks between Google Mobile Ads SDK and Unity Ads SDK.
  */
-public class UnityMediationAdapter extends Adapter implements MediationRewardedAd {
+public class UnityMediationAdapter extends Adapter
+    implements MediationRewardedAd, OnContextChangedListener {
 
     static final String TAG = UnityMediationAdapter.class.getSimpleName();
 
@@ -56,6 +59,16 @@ public class UnityMediationAdapter extends Adapter implements MediationRewardedA
      * Placement ID used to determine what type of ad to load.
      */
     private String mPlacementId;
+
+    /**
+     * Placement ID used to determine what type of ad to load.
+     */
+    private Boolean loadOnInititalize;
+
+    /**
+     * An Android {@link Activity} weak reference used to show ads.
+     */
+    WeakReference<Activity> mActivityWeakReference;
 
     /**
      * Unity adapter delegate to to forward the events from {@link UnitySingleton} to Google Mobile
@@ -193,7 +206,7 @@ public class UnityMediationAdapter extends Adapter implements MediationRewardedA
             return;
         }
 
-        UnitySingleton.getInstance().initializeUnityAds((Activity) context, gameID);
+        UnitySingleton.initializeUnityAds(mUnityAdapterRewardedAdDelegate, (Activity) context, gameID);
         initializationCompleteCallback.onInitializationSucceeded();
     }
 
@@ -220,8 +233,13 @@ public class UnityMediationAdapter extends Adapter implements MediationRewardedA
 
         mMediationAdLoadCallback = mediationAdLoadCallback;
 
-        UnitySingleton.getInstance().initializeUnityAds((Activity) context, gameID);
-        UnitySingleton.getInstance().loadAd(mUnityAdapterRewardedAdDelegate);
+        // Request UnitySingleton to load ads for mPlacementId.
+        UnitySingleton.loadAd(mUnityAdapterRewardedAdDelegate);
+
+        if (!UnityAds.isInitialized()) {
+            UnitySingleton.initializeUnityAds(mUnityAdapterRewardedAdDelegate,
+                    (Activity) context, gameID);
+        }
     }
 
     @Override
@@ -234,11 +252,10 @@ public class UnityMediationAdapter extends Adapter implements MediationRewardedA
             }
             return;
         }
-        Activity activity = (Activity) context;
 
         // Request UnitySingleton to show video ads.
         if (UnityAds.isReady(mPlacementId)) {
-            UnitySingleton.getInstance().showAd(mUnityAdapterRewardedAdDelegate, activity);
+            UnitySingleton.showAd(mUnityAdapterRewardedAdDelegate, (Activity) context);
 
             // Unity Ads does not have an ad opened callback.
             if (mMediationRewardedAdCallback != null) {
@@ -252,6 +269,18 @@ public class UnityMediationAdapter extends Adapter implements MediationRewardedA
             }
         }
 
+    }
+
+    @Override
+    public void onContextChanged(Context context) {
+        if (!(context instanceof Activity)) {
+            Log.w(TAG, "Context is not an Activity." +
+                    "Unity Ads requires an Activity context to show ads.");
+            return;
+        }
+
+        // Storing a weak reference of the current Activity to be used when showing an ad.
+        mActivityWeakReference = new WeakReference<>((Activity) context);
     }
 
     /**
