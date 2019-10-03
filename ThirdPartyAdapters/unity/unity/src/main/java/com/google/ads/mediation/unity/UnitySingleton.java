@@ -127,27 +127,6 @@ public final class UnitySingleton {
     }
 
     /**
-     * Initializes {@link UnityAds}.
-     *
-     * @param delegate    Delegate to the adapter being initialized.
-     * @param activity    The Activity context.
-     * @param gameId      Unity Ads Game ID.
-     * @param placementId Placement ID to load once Unity Ads initializes.
-     * @return {@code true} if the {@link UnityAds} has initialized successfully, {@code false}
-     * otherwise.
-     */
-    private boolean initializeUnityAds(UnityAdapterDelegate delegate,
-                                       Activity activity,
-                                       String gameId,
-                                       @NonNull String placementId) {
-        if (!TextUtils.isEmpty(placementId) && !mPlacementsInUse.containsKey(placementId)) {
-            mPlacementsInUse.put(placementId, new WeakReference<>(delegate));
-        }
-
-        return initializeUnityAds(activity, gameId);
-    }
-
-    /**
      * This method will load Unity ads for a given Placement ID and send the ad loaded event if the
      * ads have already loaded.
      *

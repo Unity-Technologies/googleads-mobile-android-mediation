@@ -32,6 +32,7 @@ import com.google.android.gms.ads.mediation.MediationInterstitialListener;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.banners.BannerView;
+import com.unity3d.services.banners.api.Banner;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -228,16 +229,6 @@ public class UnityAdapter extends UnityMediationAdapter
                                 MediationAdRequest adRequest,
                                 Bundle mediationExtras) {
 
-        AdSize supportedSize = getSupportedAdSize(context, adSize);
-        if (supportedSize == null) {
-            Log.e(TAG, "Invalid ad size requested: " + adSize);
-            if (bannerListener != null) {
-                bannerListener.onAdFailedToLoad(UnityAdapter.this,
-                        AdRequest.ERROR_CODE_INVALID_REQUEST);
-            }
-            return;
-        }
-
         String gameId = serverParameters.getString(KEY_GAME_ID);
         bannerPlacementId = serverParameters.getString(KEY_PLACEMENT_ID);
         if (!isValidIds(gameId, bannerPlacementId)) {
@@ -261,6 +252,8 @@ public class UnityAdapter extends UnityMediationAdapter
 
         // Even though we are a banner request, we still need to initialize UnityAds.
         UnitySingleton.getInstance().initializeUnityAds(activity, gameId);
+
+        BannerView = new BannerView().iin
     }
 
     @Override
