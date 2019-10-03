@@ -235,7 +235,9 @@ public class UnityAdapter extends UnityMediationAdapter
                                 MediationAdRequest adRequest,
                                 Bundle mediationExtras) {
 
-        Log.v(TAG, "Admob requesting Unity Ads Banner");
+        Log.v(TAG, "Requesting Unity Ads Banner");
+
+        bannerListener = listener;
 
         String gameId = serverParameters.getString(KEY_GAME_ID);
         bannerPlacementId = serverParameters.getString(KEY_PLACEMENT_ID);
@@ -276,7 +278,7 @@ public class UnityAdapter extends UnityMediationAdapter
 
     @Override
     public View getBannerView() {
-        Log.v(TAG, "Admob called Unity Ads Banner -> getBannerView");
+        Log.v(TAG, "Admob called Unity Ads Adaptor -> getBannerView");
         return mBannerView;
     }
 
