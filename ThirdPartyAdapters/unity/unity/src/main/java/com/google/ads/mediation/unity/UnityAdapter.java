@@ -32,6 +32,7 @@ import com.google.android.gms.ads.mediation.MediationInterstitialListener;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.banners.BannerView;
+import com.unity3d.services.banners.UnityBannerSize;
 import com.unity3d.services.banners.api.Banner;
 
 import java.lang.ref.WeakReference;
@@ -43,7 +44,7 @@ import java.util.ArrayList;
  */
 @Keep
 public class UnityAdapter extends UnityMediationAdapter
-        implements MediationInterstitialAdapter, MediationBannerAdapter {
+        implements MediationInterstitialAdapter, MediationBannerAdapter, {
 
     /**
      * Mediation interstitial listener used to forward events from {@link UnitySingleton} to
@@ -64,7 +65,7 @@ public class UnityAdapter extends UnityMediationAdapter
     /**
      * The view for the banner instance.
      */
-    private BannerView bannerView;
+    private BannerView mBannerView;
 
     /**
      * Callback object for Google's Banner Lifecycle.
@@ -253,7 +254,17 @@ public class UnityAdapter extends UnityMediationAdapter
         // Even though we are a banner request, we still need to initialize UnityAds.
         UnitySingleton.getInstance().initializeUnityAds(activity, gameId);
 
-        BannerView = new BannerView().iin
+        if(mBannerView != null) {
+            mBannerView.destroy();
+            mBannerView = null;
+        }
+
+        Integer bannerWidth = adSize.getWidth() < 320 ? 320 : adSize.getWidth();
+        Integer bannerHeight = adSize.getHeight() < 50 ? 50 : adSize.getHeight();
+        UnityBannerSize size = new UnityBannerSize(bannerWidth, bannerHeight);
+        mBannerView = new BannerView((Activity)context, bannerPlacementId, size);
+        mBannerView.setListener(this);
+        mBannerView.load();
     }
 
     @Override
