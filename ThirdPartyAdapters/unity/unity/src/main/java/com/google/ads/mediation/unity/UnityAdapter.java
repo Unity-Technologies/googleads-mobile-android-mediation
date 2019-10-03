@@ -31,12 +31,12 @@ import com.google.android.gms.ads.mediation.MediationInterstitialAdapter;
 import com.google.android.gms.ads.mediation.MediationInterstitialListener;
 
 import com.unity3d.ads.UnityAds;
+import com.unity3d.services.banners.BannerErrorCode;
+import com.unity3d.services.banners.BannerErrorInfo;
 import com.unity3d.services.banners.BannerView;
 import com.unity3d.services.banners.UnityBannerSize;
-import com.unity3d.services.banners.api.Banner;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 /**
  * The {@link UnityAdapter} is used to load Unity ads and mediate the callbacks between Google
@@ -44,7 +44,7 @@ import java.util.ArrayList;
  */
 @Keep
 public class UnityAdapter extends UnityMediationAdapter
-        implements MediationInterstitialAdapter, MediationBannerAdapter, {
+        implements MediationInterstitialAdapter, MediationBannerAdapter, BannerView.IListener{
 
     /**
      * Mediation interstitial listener used to forward events from {@link UnitySingleton} to
@@ -214,7 +214,12 @@ public class UnityAdapter extends UnityMediationAdapter
     }
 
     @Override
-    public void onDestroy() {}
+    public void onDestroy() {
+        if(mBannerView != null) {
+            mBannerView.destroy();
+        }
+        mBannerView = null;
+    }
 
     @Override
     public void onPause() {}
@@ -229,6 +234,8 @@ public class UnityAdapter extends UnityMediationAdapter
                                 AdSize adSize,
                                 MediationAdRequest adRequest,
                                 Bundle mediationExtras) {
+
+        Log.v(TAG, "Admob requesting Unity Ads Banner");
 
         String gameId = serverParameters.getString(KEY_GAME_ID);
         bannerPlacementId = serverParameters.getString(KEY_PLACEMENT_ID);
@@ -269,6 +276,33 @@ public class UnityAdapter extends UnityMediationAdapter
 
     @Override
     public View getBannerView() {
-        return bannerView;
+        Log.v(TAG, "Admob called Unity Ads Banner -> getBannerView");
+        return mBannerView;
+    }
+
+    @Override
+    public void onBannerLoaded(BannerView bannerView) {
+        mBannerView = bannerView;
+        bannerListener.onAdLoaded(UnityAdapter.this);
+        Log.v(TAG, "Unity Ads Banner finished loading");
+    }
+
+    @Override
+    public void onBannerClick(BannerView bannerView) {
+        bannerListener.onAdClicked(UnityAdapter.this);
+    }
+
+    @Override
+    public void onBannerFailedToLoad(BannerView bannerView, BannerErrorInfo bannerErrorInfo) {
+        if(bannerErrorInfo.errorCode == BannerErrorCode.NO_FILL){
+            Log.e(TAG, "Unity Ads Banner returned NO FILL");
+        } else {
+            Log.e(TAG, "Unity Ads Banner encountered an error: " + bannerErrorInfo.errorMessage);
+        }
+    }
+
+    @Override
+    public void onBannerLeftApplication(BannerView bannerView) {
+        bannerListener.onAdLeftApplication(UnityAdapter.this);
     }
 }
