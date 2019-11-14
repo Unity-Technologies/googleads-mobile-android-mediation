@@ -116,7 +116,7 @@ public final class UnitySingleton {
         MediationMetaData mediationMetaData = new MediationMetaData(activity);
         mediationMetaData.setName("AdMob");
         mediationMetaData.setVersion(BuildConfig.VERSION_NAME);
-        mediationMetaData.set("adapter_version", "3.3.0");
+        mediationMetaData.set("adapter_version", "3.3.0.1");
         mediationMetaData.commit();
 
         UnitySingletonListener listener =
@@ -138,23 +138,7 @@ public final class UnitySingleton {
         UnityAds.load(delegate.getPlacementId());
 
         if (UnityAds.isInitialized()) {
-            //If ads are currently being loaded, wait for the callbacks from
-            // unitySingletonListenerInstance.
-            // Check if an AdMob Ad request has already loaded or is in progress of requesting
-            // an Ad from Unity Ads for a single placement, and fail if there's any.
-            if (mPlacementsInUse.containsKey(delegate.getPlacementId()) &&
-                    mPlacementsInUse.get(delegate.getPlacementId()).get() != null) {
-                Log.e(UnityMediationAdapter.TAG,
-                        "An ad is already loading for placement ID: " + delegate.getPlacementId());
-                delegate.onUnityAdsError(UnityAds.UnityAdsError.INTERNAL_ERROR,
-                        delegate.getPlacementId());
-                return;
-            }
-
             mPlacementsInUse.put(delegate.getPlacementId(), new WeakReference<>(delegate));
-            if (UnityAds.isReady(delegate.getPlacementId())) {
-                delegate.onUnityAdsReady(delegate.getPlacementId());
-            }
         }
     }
 
