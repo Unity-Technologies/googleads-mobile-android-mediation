@@ -34,13 +34,13 @@ import com.google.android.gms.ads.mediation.MediationRewardedAdCallback;
 import com.google.android.gms.ads.mediation.MediationRewardedAdConfiguration;
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.mediation.IUnityAdsExtendedListener;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
-public class UnityRewardedAd implements MediationRewardedAd, IUnityAdsExtendedListener {
+public class UnityRewardedAd implements MediationRewardedAd {
 
   /**
    * Mediation rewarded video ad listener used to forward ad load status to the Google Mobile Ads
@@ -191,8 +191,7 @@ public class UnityRewardedAd implements MediationRewardedAd, IUnityAdsExtendedLi
 
     // Every call to UnityAds#show will result in an onUnityAdsFinish callback (even when
     // Unity Ads fails to show an ad).
-    UnityAds.addListener(UnityRewardedAd.this);
-    UnityAds.show(activity, mPlacementId);
+    UnityAds.show(activity, mPlacementId, mUnityShowListener);
 
     // Unity Ads does not have an ad opened callback.
     if (mMediationRewardedAdCallback == null) {
@@ -202,65 +201,53 @@ public class UnityRewardedAd implements MediationRewardedAd, IUnityAdsExtendedLi
     mMediationRewardedAdCallback.onAdOpened();
   }
 
-  @Override
-  public void onUnityAdsReady(String placementId) {
-    // Logic to mark a placement ready has moved to the IUnityAdsLoadListener function
-    // onUnityAdsAdLoaded.
-  }
-
-  @Override
-  public void onUnityAdsStart(String placementId) {
-    // Unity Ads video ad started playing. Send Video Started event if this is a rewarded
-    // video.
-    if (mMediationRewardedAdCallback != null) {
-      mMediationRewardedAdCallback.reportAdImpression();
-      mMediationRewardedAdCallback.onVideoStart();
-    }
-  }
-
-  @Override
-  public void onUnityAdsClick(String placementId) {
-    // Unity Ads ad clicked.
-    if (mMediationRewardedAdCallback == null) {
-      mMediationRewardedAdCallback.reportAdClicked();
-    }
-  }
-
-  @Override
-  public void onUnityAdsPlacementStateChanged(String placementId,
-      UnityAds.PlacementState oldState,
-      UnityAds.PlacementState newState) {
-    // This callback is not forwarded to Google Mobile Ads SDK. onUnityAdsError should be used
-    // to forward Unity Ads SDK state to Google Mobile Ads SDK.
-  }
-
-  @Override
-  public void onUnityAdsFinish(String placementId, UnityAds.FinishState finishState) {
-    // Unity Ads ad closed.
-    UnityAds.removeListener(UnityRewardedAd.this);
-    if (mMediationRewardedAdCallback == null) {
-      return;
+  /**
+   * IUnityAdsShowListener instance. Contains logic for callbacks when showing ads.
+   */
+  private IUnityAdsShowListener mUnityShowListener = new IUnityAdsShowListener() {
+    @Override
+    public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message) {
+      // Unity Ads ad failed to show.
+      String sdkError = createSDKError(error, message);
+      Log.w(TAG, "Unity Ads returned an error: " + sdkError);
+      if (mMediationRewardedAdCallback != null) {
+        mMediationRewardedAdCallback.onAdFailedToShow(sdkError);
+      }
     }
 
-    // Reward is provided only if the ad is watched completely.
-    if (finishState == UnityAds.FinishState.COMPLETED) {
-      mMediationRewardedAdCallback.onVideoComplete();
-      // Unity Ads doesn't provide a reward value. The publisher is expected to
-      // override the reward in AdMob console.
-      mMediationRewardedAdCallback.onUserEarnedReward(new UnityReward());
+    @Override
+    public void onUnityAdsShowStart(String placementId) {
+      // Unity Ads video ad started playing. Send Video Started event if this is a rewarded
+      // video.
+      if (mMediationRewardedAdCallback != null) {
+        mMediationRewardedAdCallback.reportAdImpression();
+        mMediationRewardedAdCallback.onVideoStart();
+      }
     }
-    mMediationRewardedAdCallback.onAdClosed();
-  }
 
-  @Override
-  public void onUnityAdsError(UnityAds.UnityAdsError unityAdsError, String errorMessage) {
-    // Unity Ads ad failed to show.
-    UnityAds.removeListener(UnityRewardedAd.this);
-
-    String sdkError = createSDKError(unityAdsError, errorMessage);
-    Log.w(TAG, "Unity Ads returned an error: " + sdkError);
-    if (mMediationRewardedAdCallback != null) {
-      mMediationRewardedAdCallback.onAdFailedToShow(sdkError);
+    @Override
+    public void onUnityAdsShowClick(String placementId) {
+      // Unity Ads ad clicked.
+      if (mMediationRewardedAdCallback == null) {
+        mMediationRewardedAdCallback.reportAdClicked();
+      }
     }
-  }
+
+    @Override
+    public void onUnityAdsShowComplete(String placementId, UnityAds.UnityAdsShowCompletionState state){
+      // Unity Ads ad closed.
+      if (mMediationRewardedAdCallback == null) {
+        return;
+      }
+
+      // Reward is provided only if the ad is watched completely.
+      if (state == UnityAds.UnityAdsShowCompletionState.COMPLETED) {
+        mMediationRewardedAdCallback.onVideoComplete();
+        // Unity Ads doesn't provide a reward value. The publisher is expected to
+        // override the reward in AdMob console.
+        mMediationRewardedAdCallback.onUserEarnedReward(new UnityReward());
+      }
+      mMediationRewardedAdCallback.onAdClosed();
+    }
+  };
 }
