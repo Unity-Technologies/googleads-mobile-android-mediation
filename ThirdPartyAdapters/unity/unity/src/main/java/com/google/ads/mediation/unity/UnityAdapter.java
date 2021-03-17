@@ -84,8 +84,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
     }
 
     @Override
-    public void onUnityAdsFailedToLoad(String placementId) {
-      // TODO: replace signature with: public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
+    public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
       mPlacementsInUse.remove(mPlacementId);
       String errorMessage = createAdapterError(
           ERROR_PLACEMENT_STATE_NO_FILL,
@@ -228,6 +227,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
   private IUnityAdsShowListener mUnityShowListener = new IUnityAdsShowListener() {
     @Override
     public void onUnityAdsShowStart(String placementId) {
+      Log.d(TAG, "Unity interstitial ad for placement ID '" + mPlacementId + "' started.");
       // Unity Ads video ad started playing. Google Mobile Ads SDK does not support
       // callbacks for Interstitial ads when they start playing.
     }
