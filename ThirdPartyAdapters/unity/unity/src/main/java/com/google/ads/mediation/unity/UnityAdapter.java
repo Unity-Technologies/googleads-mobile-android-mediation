@@ -34,6 +34,8 @@ import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.UnityAds.UnityAdsLoadError;
+import com.unity3d.ads.UnityAds.UnityAdsShowError;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
@@ -84,7 +86,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
     }
 
     @Override
-    public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
+    public void onUnityAdsFailedToLoad(String placementId, UnityAdsLoadError error, String message) {
       mPlacementsInUse.remove(mPlacementId);
       String errorMessage = createAdapterError(
           ERROR_PLACEMENT_STATE_NO_FILL,
@@ -257,7 +259,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
     }
 
     @Override
-    public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message) {
+    public void onUnityAdsShowFailure(String placementId, UnityAdsShowError error, String message) {
       // Unity Ads ad failed to show.
       String sdkError = createSDKShowError(error, message);
       Log.w(TAG, "Unity Ads returned an error: " + sdkError);

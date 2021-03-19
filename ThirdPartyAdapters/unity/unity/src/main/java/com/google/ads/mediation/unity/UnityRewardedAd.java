@@ -82,7 +82,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
     }
 
     @Override
-    public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
+    public void onUnityAdsFailedToLoad(String placementId, UnityAdsLoadError error, String message) {
       mPlacementsInUse.remove(mPlacementId);
       String errorMessage = createAdapterError(
           ERROR_PLACEMENT_STATE_NO_FILL,
@@ -191,8 +191,6 @@ public class UnityRewardedAd implements MediationRewardedAd {
       return;
     }
 
-    // Every call to UnityAds#show will result in an onUnityAdsFinish callback (even when
-    // Unity Ads fails to show an ad).
     UnityAds.show(activity, mPlacementId, mUnityShowListener);
 
     // Unity Ads does not have an ad opened callback.
@@ -243,7 +241,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
     }
 
     @Override
-    public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message) {
+    public void onUnityAdsShowFailure(String placementId, UnityAdsShowError error, String message) {
       // Unity Ads ad failed to show.
       String sdkError = createSDKShowError(error, message);
       Log.w(TAG, "Unity Ads returned an error: " + sdkError);
