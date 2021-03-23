@@ -58,6 +58,11 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
   private String mPlacementId;
 
   /**
+   * Placement ID kept once placement was properly loaded internally.
+   */
+  private String mLoadedPlacementId;
+
+  /**
    * An Android {@link Activity} weak reference used to show ads.
    */
   private WeakReference<Activity> mActivityWeakReference;
@@ -80,6 +85,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
     public void onUnityAdsAdLoaded(String placementId) {
       Log.d(TAG, "Unity Ads interstitial ad successfully loaded for placement ID '"
           + placementId + "'.");
+      mLoadedPlacementId = placementId;
       if (mMediationInterstitialListener != null) {
         mMediationInterstitialListener.onAdLoaded(UnityAdapter.this);
       }
@@ -212,7 +218,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
       return;
     }
 
-    if (!UnityAds.isReady(mPlacementId)) {
+    if (mLoadedPlacementId == null) {
       Log.w(TAG,
           "Unity Ads failed to show interstitial ad for placement ID '" + mPlacementId +
               "'. Placement is not ready.");
@@ -263,6 +269,9 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
       // Unity Ads ad failed to show.
       String sdkError = createSDKShowError(error, message);
       Log.w(TAG, "Unity Ads returned an error: " + sdkError);
+      if (mMediationInterstitialListener != null && error == UnityAdsShowError.NOT_READY) {
+        mMediationInterstitialListener.onAdClosed(UnityAdapter.this);
+      }
     }
   };
 

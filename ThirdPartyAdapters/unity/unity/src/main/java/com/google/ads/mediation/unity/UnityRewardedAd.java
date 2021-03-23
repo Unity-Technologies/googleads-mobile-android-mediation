@@ -63,6 +63,11 @@ public class UnityRewardedAd implements MediationRewardedAd {
   private String mPlacementId;
 
   /**
+   * Placement ID kept once placement was properly loaded internally.
+   */
+  private String mLoadedPlacementId;
+
+  /**
    * A list of placement IDs that are currently loaded to prevent duplicate requests.
    */
   private static HashMap<String, WeakReference<UnityRewardedAd>> mPlacementsInUse = new HashMap<>();
@@ -75,6 +80,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
     public void onUnityAdsAdLoaded(String placementId) {
       Log.d(TAG, "Unity Ads rewarded ad successfully loaded for placement ID '"
           + placementId + "'");
+      mLoadedPlacementId = placementId;
       if (mMediationAdLoadCallback == null) {
         return;
       }
@@ -182,7 +188,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
     Activity activity = (Activity) context;
 
     // Check if the placement is ready before showing
-    if (!UnityAds.isReady(mPlacementId)) {
+    if (mLoadedPlacementId == null) {
       String adapterError = createAdapterError(ERROR_AD_NOT_READY, "Ad is not ready to be shown.");
       Log.w(TAG, "Failed to show Unity Ads Rewarded ad: " + adapterError);
       if (mMediationRewardedAdCallback != null) {
