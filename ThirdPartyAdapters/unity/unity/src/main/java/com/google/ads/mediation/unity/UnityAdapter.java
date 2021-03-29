@@ -58,11 +58,6 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
   private String mPlacementId;
 
   /**
-   * Placement ID kept once placement was properly loaded internally.
-   */
-  private String mLoadedPlacementId;
-
-  /**
    * An Android {@link Activity} weak reference used to show ads.
    */
   private WeakReference<Activity> mActivityWeakReference;
@@ -85,7 +80,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
     public void onUnityAdsAdLoaded(String placementId) {
       Log.d(TAG, "Unity Ads interstitial ad successfully loaded for placement ID '"
           + placementId + "'.");
-      mLoadedPlacementId = placementId;
+      mPlacementId = placementId;
       if (mMediationInterstitialListener != null) {
         mMediationInterstitialListener.onAdLoaded(UnityAdapter.this);
       }
@@ -207,7 +202,6 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
     // Unity Ads does not have an ad opened callback. Sending Ad Opened event before showing the
     // ad.
     mMediationInterstitialListener.onAdOpened(UnityAdapter.this);
-    mPlacementsInUse.remove(mPlacementId);
 
     Activity activityReference =
         mActivityWeakReference == null ? null : mActivityWeakReference.get();
@@ -218,12 +212,13 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
       return;
     }
 
-    if (mLoadedPlacementId == null) {
+    if (mPlacementId == null) {
       Log.w(TAG,
           "Unity Ads failed to show interstitial ad for placement ID '" + mPlacementId +
               "'. Placement is not ready.");
       mMediationInterstitialListener.onAdClosed(UnityAdapter.this);
-      return;
+    } else {
+      mPlacementsInUse.remove(mPlacementId);
     }
 
     UnityAds.show(activityReference, mPlacementId, mUnityShowListener);
