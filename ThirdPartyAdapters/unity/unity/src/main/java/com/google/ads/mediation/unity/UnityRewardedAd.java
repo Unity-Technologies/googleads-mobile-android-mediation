@@ -63,11 +63,6 @@ public class UnityRewardedAd implements MediationRewardedAd {
   private String mPlacementId;
 
   /**
-   * Placement ID kept once placement was properly loaded internally.
-   */
-  private String mLoadedPlacementId;
-
-  /**
    * A list of placement IDs that are currently loaded to prevent duplicate requests.
    */
   private static HashMap<String, WeakReference<UnityRewardedAd>> mPlacementsInUse = new HashMap<>();
@@ -80,7 +75,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
     public void onUnityAdsAdLoaded(String placementId) {
       Log.d(TAG, "Unity Ads rewarded ad successfully loaded for placement ID '"
           + placementId + "'");
-      mLoadedPlacementId = placementId;
+      mPlacementId = placementId;
       if (mMediationAdLoadCallback == null) {
         return;
       }
@@ -123,9 +118,9 @@ public class UnityRewardedAd implements MediationRewardedAd {
 
     Bundle serverParameters = mediationRewardedAdConfiguration.getServerParameters();
     final String gameId = serverParameters.getString(UnityMediationAdapter.KEY_GAME_ID);
-    mPlacementId = serverParameters.getString(UnityMediationAdapter.KEY_PLACEMENT_ID);
+    final String placementId = serverParameters.getString(UnityMediationAdapter.KEY_PLACEMENT_ID);
 
-    if (!UnityAdapter.isValidIds(gameId, mPlacementId)) {
+    if (!UnityAdapter.isValidIds(gameId, placementId)) {
       String adapterError =
           createAdapterError(
               ERROR_INVALID_SERVER_PARAMETERS, "Missing or Invalid server parameters.");
@@ -141,7 +136,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
           @Override
           public void onInitializationComplete() {
             Log.d(TAG, "Unity Ads successfully initialized, can now " +
-                "load rewarded ad for placement ID '" + mPlacementId + "' in game " +
+                "load rewarded ad for placement ID '" + placementId + "' in game " +
                 "'" + gameId + "'.");
           }
 
@@ -156,8 +151,8 @@ public class UnityRewardedAd implements MediationRewardedAd {
           }
         });
 
-    if (mPlacementsInUse.containsKey(mPlacementId) && mPlacementsInUse.get(mPlacementId).get() != null) {
-      WeakReference<UnityRewardedAd> adapterRef = mPlacementsInUse.get(mPlacementId);
+    if (mPlacementsInUse.containsKey(placementId) && mPlacementsInUse.get(placementId).get() != null) {
+      WeakReference<UnityRewardedAd> adapterRef = mPlacementsInUse.get(placementId);
       if (adapterRef != null && adapterRef.get() != null) {
         if (mMediationAdLoadCallback != null) {
           String adapterError = createAdapterError(ERROR_AD_ALREADY_LOADING, "Unity Ads has already loaded placement " + mPlacementId);
@@ -166,8 +161,8 @@ public class UnityRewardedAd implements MediationRewardedAd {
         return;
       }
     }
-    mPlacementsInUse.put(mPlacementId, new WeakReference<UnityRewardedAd>(UnityRewardedAd.this));
-    UnityAds.load(mPlacementId, mUnityLoadListener);
+    mPlacementsInUse.put(placementId, new WeakReference<UnityRewardedAd>(UnityRewardedAd.this));
+    UnityAds.load(placementId, mUnityLoadListener);
   }
 
   @Override
@@ -188,23 +183,20 @@ public class UnityRewardedAd implements MediationRewardedAd {
     Activity activity = (Activity) context;
 
     // Check if the placement is ready before showing
-    if (mLoadedPlacementId == null) {
+    if (mPlacementId == null) {
       String adapterError = createAdapterError(ERROR_AD_NOT_READY, "Ad is not ready to be shown.");
       Log.w(TAG, "Failed to show Unity Ads Rewarded ad: " + adapterError);
       if (mMediationRewardedAdCallback != null) {
         mMediationRewardedAdCallback.onAdFailedToShow(adapterError);
       }
-      return;
     }
 
     UnityAds.show(activity, mPlacementId, mUnityShowListener);
 
     // Unity Ads does not have an ad opened callback.
-    if (mMediationRewardedAdCallback == null) {
-      return;
+    if (mMediationRewardedAdCallback != null) {
+      mMediationRewardedAdCallback.onAdOpened();
     }
-
-    mMediationRewardedAdCallback.onAdOpened();
   }
 
   /**
