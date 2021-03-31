@@ -88,6 +88,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
 
     @Override
     public void onUnityAdsFailedToLoad(String placementId, UnityAdsLoadError error, String message) {
+      mPlacementId = placementId;
       mPlacementsInUse.remove(mPlacementId);
       String errorMessage = createAdapterError(
           ERROR_PLACEMENT_STATE_NO_FILL,
@@ -214,9 +215,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
 
     if (mPlacementId == null) {
       Log.w(TAG,
-          "Unity Ads failed to show interstitial ad for placement ID '" + mPlacementId +
-              "'. Placement is not ready.");
-      mMediationInterstitialListener.onAdClosed(UnityAdapter.this);
+          "Unity Ads received call to show before successfully loading an ad");
     } else {
       mPlacementsInUse.remove(mPlacementId);
     }

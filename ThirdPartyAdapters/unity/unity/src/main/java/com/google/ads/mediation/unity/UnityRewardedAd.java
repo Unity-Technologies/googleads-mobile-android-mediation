@@ -84,6 +84,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
 
     @Override
     public void onUnityAdsFailedToLoad(String placementId, UnityAdsLoadError error, String message) {
+      mPlacementId = placementId;
       mPlacementsInUse.remove(mPlacementId);
       String errorMessage = createAdapterError(
           ERROR_PLACEMENT_STATE_NO_FILL,
@@ -184,11 +185,8 @@ public class UnityRewardedAd implements MediationRewardedAd {
 
     // Check if the placement is ready before showing
     if (mPlacementId == null) {
-      String adapterError = createAdapterError(ERROR_AD_NOT_READY, "Ad is not ready to be shown.");
-      Log.w(TAG, "Failed to show Unity Ads Rewarded ad: " + adapterError);
-      if (mMediationRewardedAdCallback != null) {
-        mMediationRewardedAdCallback.onAdFailedToShow(adapterError);
-      }
+      Log.w(TAG,
+          "Unity Ads received call to show before successfully loading an ad");
     }
 
     UnityAds.show(activity, mPlacementId, mUnityShowListener);
