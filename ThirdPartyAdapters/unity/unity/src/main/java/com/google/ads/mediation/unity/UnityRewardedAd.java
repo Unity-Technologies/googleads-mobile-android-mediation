@@ -185,8 +185,8 @@ public class UnityRewardedAd implements MediationRewardedAd {
 
     // Check if the placement is ready before showing
     if (mPlacementId == null) {
-      String adapterError = createAdapterError(ERROR_AD_NOT_READY, "Ad is not ready to be shown.");
-      Log.w(TAG, "Failed to show Unity Ads Rewarded ad: " + adapterError);
+      Log.w(TAG,
+          "Unity Ads received call to show before successfully loading an ad");
     }
 
     UnityAds.show(activity, mPlacementId, mUnityShowListener);
