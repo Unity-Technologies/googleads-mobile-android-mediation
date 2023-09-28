@@ -26,9 +26,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.mediation.MediationAdLoadCallback;
 import com.google.android.gms.ads.mediation.MediationRewardedAd;
@@ -42,6 +44,7 @@ import com.unity3d.ads.UnityAds.UnityAdsLoadError;
 import com.unity3d.ads.UnityAds.UnityAdsShowError;
 import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.ads.UnityAdsShowOptions;
+
 import java.util.UUID;
 
 /**
@@ -162,7 +165,7 @@ public class UnityRewardedAd implements MediationRewardedAd {
     }
 
     UnityAdsShowOptions unityAdsShowOptions =
-        unityAdsLoader.createUnityAdsShowOptionsWithId(objectId);
+        unityAdsLoader.createUnityAdsShowOptionsWithId(objectId, mediationRewardedAdConfiguration);
 
     // UnityAds can handle a null placement ID so show is always called here.
     unityAdsLoader.show(activity, placementId, unityAdsShowOptions, unityShowListener);
