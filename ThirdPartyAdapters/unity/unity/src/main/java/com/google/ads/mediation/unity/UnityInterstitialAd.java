@@ -238,7 +238,7 @@ public class UnityInterstitialAd
     }
 
     UnityAdsShowOptions unityAdsShowOptions =
-        unityAdsLoader.createUnityAdsShowOptionsWithId(objectId);
+        unityAdsLoader.createUnityAdsShowOptionsWithId(objectId, adConfiguration);
     // UnityAds can handle a null placement ID so show is always called here.
     unityAdsLoader.show(activityReference, placementId, unityAdsShowOptions, this);
   }
