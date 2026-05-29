@@ -67,9 +67,9 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
   private String objectId;
 
   /**
-   * An Android {@link Activity} weak reference used to show ads.
+   * An Android {@link Context} weak reference used to show ads.
    */
-  private WeakReference<Activity> activityWeakReference;
+  private WeakReference<Context> contextWeakReference;
 
   /**
    * UnityInterstitialEventAdapter instance to send events from the mediationInterstitialListener.
@@ -117,13 +117,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
       return;
     }
 
-    if (!(context instanceof Activity)) {
-      sendAdFailedToLoad(ERROR_CONTEXT_NOT_ACTIVITY,
-          "Unity Ads requires an Activity context to load ads.");
-      return;
-    }
-    Activity activity = (Activity) context;
-    activityWeakReference = new WeakReference<>(activity);
+    contextWeakReference = new WeakReference<>(context);
 
     UnityInitializer.getInstance()
         .initializeUnityAds(context, gameId, new IUnityAdsInitializationListener() {
@@ -172,13 +166,8 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
    */
   @Override
   public void showInterstitial() {
-    Activity activityReference = activityWeakReference == null ? null : activityWeakReference.get();
-    if (activityReference == null) {
-      Log.w(TAG, "Failed to show interstitial ad for placement ID '" + placementId
-          + "' from Unity Ads: Activity context is null.");
-      eventAdapter.sendAdEvent(AdEvent.CLOSED);
-      return;
-    }
+    Context context = contextWeakReference == null ? null : contextWeakReference.get();
+    Activity referencedActivity = context instanceof Activity ? (Activity) context : null;
 
     if (placementId == null) {
       Log.w(TAG, "Unity Ads received call to show before successfully loading an ad.");
@@ -187,7 +176,7 @@ public class UnityAdapter extends UnityMediationAdapter implements MediationInte
     UnityAdsShowOptions unityAdsShowOptions = new UnityAdsShowOptions();
     unityAdsShowOptions.setObjectId(objectId);
     // UnityAds can handle a null placement ID so show is always called here.
-    UnityAds.show(activityReference, placementId, unityAdsShowOptions, unityShowListener);
+    UnityAds.show(referencedActivity, placementId, unityAdsShowOptions, unityShowListener);
   }
 
   /**

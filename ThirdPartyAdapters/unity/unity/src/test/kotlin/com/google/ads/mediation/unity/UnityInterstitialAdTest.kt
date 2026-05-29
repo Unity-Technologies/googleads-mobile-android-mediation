@@ -2,6 +2,7 @@ package com.google.ads.mediation.unity
 
 import android.app.Activity
 import androidx.core.os.bundleOf
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.ads.mediation.unity.UnityAdsAdapterUtils.getMediationErrorCode
 import com.google.ads.mediation.unity.UnityMediationAdapter.SDK_ERROR_DOMAIN
@@ -25,6 +26,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.notNull
 import org.mockito.kotlin.spy
@@ -131,6 +133,17 @@ class UnityInterstitialAdTest {
       .isEqualTo(getMediationErrorCode(UnityAdsShowError.INTERNAL_ERROR))
     assertThat(capturedError.message).isEqualTo(ERROR_MESSAGE)
     assertThat(capturedError.domain).isEqualTo(SDK_ERROR_DOMAIN)
+  }
+
+  @Test
+  fun showAd_withNonActivityContext_callsShowWithNullActivity() {
+    val unityAdsShowOptions: UnityAdsShowOptions = mock()
+    whenever(unityAdsLoader.createUnityAdsShowOptionsWithId(any())) doReturn unityAdsShowOptions
+    unityInterstitialAd.onUnityAdsAdLoaded(PLACEMENT_ID)
+
+    unityInterstitialAd.showAd(ApplicationProvider.getApplicationContext())
+
+    verify(unityAdsLoader).show(isNull(), any(), any(), any())
   }
 
   @Test
