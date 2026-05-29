@@ -22,6 +22,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
@@ -201,7 +202,7 @@ class UnityRewardedAdTest {
   @Test
   fun showAd_withNonActivityContext_callsShowWithNullActivity() {
     val unityAdsShowOptions: UnityAdsShowOptions = mock()
-    whenever(unityAdsLoader.createUnityAdsShowOptionsWithId(any())) doReturn unityAdsShowOptions
+    whenever(unityAdsLoader.createUnityAdsShowOptionsWithId(anyOrNull())) doReturn unityAdsShowOptions
     unityRewardedAd.unityLoadListener.onUnityAdsAdLoaded(TEST_PLACEMENT_ID)
 
     unityRewardedAd.showAd(ApplicationProvider.getApplicationContext())
