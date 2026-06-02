@@ -1,5 +1,16 @@
 ## BidMachine Android Mediation Adapter Changelog
 
+#### Next Version
+- Maps `AgeRestrictedTreatment` to BidMachine's COPPA API.
+
+#### Version 3.7.0.0
+- Verified compatibility with BidMachine SDK version 3.7.0.
+
+Built and tested with:
+- Google Mobile Ads SDK version 25.1.0.
+- Google Mobile Ads Next-Gen SDK version 1.1.0.
+- BidMachine SDK version 3.7.0.
+
 #### Version 3.6.1.0
 - Added property to build the adapter with GMA Next-Gen SDK dependency.
 - Verified compatibility with BidMachine SDK version 3.6.1.

@@ -12,7 +12,7 @@ ext {
     // String property to store the proper name of the mediation network adapter.
     adapterName = "Line"
     // String property to store version name.
-    stringVersion = "3.1.0.0"
+    stringVersion = "3.1.1.0"
     // String property to store group id.
     stringGroupId = "com.google.ads.mediation"
     // Jacoco version to generate code coverage data
@@ -47,6 +47,8 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
+        languageVersion = "1.9"
+        apiVersion = "1.9"
     }
 
     buildFeatures {
@@ -136,16 +138,16 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.8.0'
     // Check for a 'useNextGenGma' flag to use the next generation GMA SDK.
     if (project.hasProperty('useNextGenGma')) {
-        implementation 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:0.24.0-beta03'
+        implementation 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.1.0'
     } else {
-        implementation 'com.google.android.gms:play-services-ads:25.1.0'
+        implementation 'com.google.android.gms:play-services-ads:25.3.0'
     }
-    implementation 'com.linecorp.adsnetwork:fivead:3.1.0'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0'
+    implementation 'com.linecorp.adsnetwork:fivead:3.1.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'androidx.test:core:1.5.0'
-    testImplementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.10'
+    testImplementation 'org.jetbrains.kotlin:kotlin-stdlib:2.3.0'
     testImplementation 'org.mockito:mockito-core:5.5.0'
     testImplementation "org.jacoco:org.jacoco.core:$jacocoVersion"
     testImplementation 'androidx.test.ext:junit-ktx:1.1.5'
@@ -156,6 +158,7 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.9'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
     testImplementation project(':adaptertestkit')
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
 /**

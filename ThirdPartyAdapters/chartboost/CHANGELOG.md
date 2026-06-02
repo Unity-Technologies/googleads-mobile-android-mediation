@@ -1,10 +1,22 @@
 ## Chartboost Android Mediation Adapter Changelog
 
+#### Next Version
+- Maps `AgeRestrictedTreatment` to Chartboost's COPPA API.
+
+#### Version 9.12.0.0
+- Verified compatibility with Chartboost SDK version 9.12.0.
+
+Built and tested with:
+- Google Mobile Ads SDK version 25.2.0.
+- Google Mobile Ads Next-Gen SDK version 1.1.0.
+- Chartboost SDK version 9.12.0.
+
 #### Version 9.11.1.1
 - Added property to build the adapter with GMA Next-Gen SDK dependency.
 
 Built and tested with:
 - Google Mobile Ads SDK version 25.1.0.
+- Google Mobile Ads Next-Gen SDK version 1.1.0.
 - Chartboost SDK version 9.11.1.
 
 #### Version 9.11.1.0

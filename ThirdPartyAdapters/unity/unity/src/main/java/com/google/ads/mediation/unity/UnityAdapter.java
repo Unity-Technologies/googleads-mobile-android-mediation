@@ -49,6 +49,9 @@ import java.lang.ref.WeakReference;
 /**
  * The {@link UnityAdapter} is used to load Unity ads and mediate the callbacks between Google
  * Mobile Ads SDK and Unity Ads SDK.
+ *
+ * <p>Do not delete this class though it's empty. GMA SDK references this class for loading Unity
+ * Ads Waterfall Banner and Interstitial ads.
  */
 @Keep
 @OptIn(markerClass = UnityAdsExperimental.class)
