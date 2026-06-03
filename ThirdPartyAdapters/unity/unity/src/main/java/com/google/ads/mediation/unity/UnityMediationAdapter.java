@@ -17,7 +17,6 @@ package com.google.ads.mediation.unity;
 import static com.google.ads.mediation.unity.UnityAdsAdapterUtils.createSDKInitializationError;
 import static com.google.ads.mediation.unity.UnityAdsAdapterUtils.getAdFormat;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -181,18 +180,6 @@ public class UnityMediationAdapter extends RtbAdapter {
       @NonNull RtbSignalData rtbSignalData, @NonNull SignalCallbacks signalCallbacks) {
     AdFormat adFormat = getAdFormat(rtbSignalData);
     com.unity3d.ads.AdFormat unityAdFormat = null;
-
-    // For banner ad format, Unity Ads SDK requires an activity context to load the banner ad. So,
-    // fail here so that Unity bidder will not bid if the ad request was made with a non-activity
-    // context.
-    if (adFormat == AdFormat.BANNER && !(rtbSignalData.getContext() instanceof Activity)) {
-      signalCallbacks.onFailure(
-          new AdError(
-              ERROR_CONTEXT_NOT_ACTIVITY,
-              "Unity Ads RTB Banner ads require activity context",
-              ADAPTER_ERROR_DOMAIN));
-      return;
-    }
 
     if (adFormat == AdFormat.BANNER) {
       unityAdFormat = com.unity3d.ads.AdFormat.BANNER;

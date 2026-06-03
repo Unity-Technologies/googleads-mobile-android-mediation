@@ -18,9 +18,7 @@ import static com.google.ads.mediation.unity.UnityAdsAdapterUtils.createSDKIniti
 import static com.google.ads.mediation.unity.UnityAdsAdapterUtils.createSDKLoadError;
 import static com.google.ads.mediation.unity.UnityMediationAdapter.ADAPTER_ERROR_DOMAIN;
 import static com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_MISSING_PARAMETERS;
-import static com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_NON_ACTIVITY;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -56,8 +54,8 @@ public class UnityMediationBannerAd
   /** The loaded BannerAd instance from Unity Ads SDK. */
   @Nullable private BannerAd loadedBannerAd;
 
-  /** Activity context used for banner ad */
-  @Nullable private Activity activity;
+  /** Context used for banner ad */
+  @Nullable private Context context;
 
   /** Placement ID for banner if requested. */
   private String bannerPlacementId;
@@ -171,19 +169,8 @@ public class UnityMediationBannerAd
       return;
     }
 
-    if (!(context instanceof Activity)) {
-      AdError adError =
-          new AdError(
-              UnityMediationAdapter.ERROR_CONTEXT_NOT_ACTIVITY,
-              ERROR_MSG_NON_ACTIVITY,
-              ADAPTER_ERROR_DOMAIN);
-      Log.w(UnityMediationAdapter.TAG, adError.toString());
-      mediationBannerAdLoadCallback.onFailure(adError);
-      return;
-    }
-
     final String adMarkup = mediationBannerAdConfiguration.getBidResponse();
-    this.activity = (Activity) context;
+    this.context = context;
 
     // It is RTB if adMarkup is not empty.
     boolean isRtb = !TextUtils.isEmpty(adMarkup);
@@ -242,8 +229,7 @@ public class UnityMediationBannerAd
   @Override
   public View getView() {
     if (loadedBannerAd == null) {
-      // Return empty view if banner ad is not loaded yet
-      return new View(activity != null ? activity : null);
+      return new View(context);
     }
     return loadedBannerAd.getView();
   }
