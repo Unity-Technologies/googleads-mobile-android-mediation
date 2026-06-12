@@ -83,7 +83,8 @@ public class UnityMediationAdapter extends RtbAdapter {
           ERROR_UNITY_ADS_NOT_SUPPORTED,
           ERROR_FINISH,
           ERROR_BANNER_SIZE_MISMATCH,
-          ERROR_INITIALIZATION_FAILURE
+          ERROR_INITIALIZATION_FAILURE,
+          ERROR_TOKEN_FAILURE
       })
   @interface AdapterError {
 
@@ -136,6 +137,11 @@ public class UnityMediationAdapter extends RtbAdapter {
    * UnityAds returned an initialization error.
    */
   static final int ERROR_INITIALIZATION_FAILURE = 111;
+
+  /**
+   * UnityAds failed to return a bidding token.
+   */
+  static final int ERROR_TOKEN_FAILURE = 112;
 
   static final String ERROR_MSG_MISSING_PARAMETERS = "Missing or invalid server parameters.";
 
@@ -196,16 +202,28 @@ public class UnityMediationAdapter extends RtbAdapter {
       unityAdsWrapper.getToken(
           tokenConfiguration,
           token -> {
-            if (token == null) {
-              token = "";
+            if (token == null || token.isEmpty()) {
+              AdError error =
+                  new AdError(
+                      ERROR_TOKEN_FAILURE,
+                      "Unity Ads failed to get a bidding token.",
+                      ADAPTER_ERROR_DOMAIN);
+              signalCallbacks.onFailure(error);
+              return;
             }
             signalCallbacks.onSuccess(token);
           });
     } else {
       unityAdsWrapper.getToken(
           token -> {
-            if (token == null) {
-              token = "";
+            if (token == null || token.isEmpty()) {
+              AdError error =
+                  new AdError(
+                      ERROR_TOKEN_FAILURE,
+                      "Unity Ads failed to get a bidding token.",
+                      ADAPTER_ERROR_DOMAIN);
+              signalCallbacks.onFailure(error);
+              return;
             }
             signalCallbacks.onSuccess(token);
           });
