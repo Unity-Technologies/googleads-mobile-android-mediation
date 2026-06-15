@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.MobileAds;
@@ -46,8 +45,6 @@ import com.unity3d.ads.RewardedShowListener;
 import com.unity3d.ads.ShowConfiguration;
 import com.unity3d.ads.ShowFinishState;
 import com.unity3d.ads.UnityAdsError;
-import com.unity3d.ads.UnityAdsExperimental;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -58,7 +55,6 @@ import java.util.UUID;
  *
  * <p><b>Note:</b> This class is not thread-safe.
  */
-@UnityAdsExperimental
 public class UnityRewardedAd implements MediationRewardedAd {
 
   /**
@@ -128,7 +124,6 @@ public class UnityRewardedAd implements MediationRewardedAd {
   }
 
   /** Loads a rewarded ad. */
-  @OptIn(markerClass = UnityAdsExperimental.class)
   public void loadAd(MediationRewardedAdConfiguration mediationRewardedAdConfiguration) {
     Context context = mediationRewardedAdConfiguration.getContext();
     Bundle serverParameters = mediationRewardedAdConfiguration.getServerParameters();

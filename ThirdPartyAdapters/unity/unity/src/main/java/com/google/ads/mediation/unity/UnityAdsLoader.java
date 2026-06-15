@@ -61,8 +61,6 @@ class UnityAdsLoader {
         LoadListener<RewardedAd> listener) {
 
       LoadConfiguration.Builder builder = new LoadConfiguration.Builder(placementId)
-//      .setObjectId(objectId)
-//      .withMediationAdUnitId()
         .withMediationInfo(getMediationInfo());
 
       if (adMarkup != null) {

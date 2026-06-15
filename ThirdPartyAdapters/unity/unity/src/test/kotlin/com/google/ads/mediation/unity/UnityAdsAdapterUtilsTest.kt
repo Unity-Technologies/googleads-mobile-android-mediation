@@ -8,7 +8,6 @@ import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.google.common.truth.Truth.assertThat
 import com.unity3d.ads.UnityAdsError
-import com.unity3d.ads.UnityAdsExperimental
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +20,6 @@ import org.mockito.kotlin.whenever
 
 /** Unit tests for [UnityAdsAdapterUtils]. */
 @RunWith(AndroidJUnit4::class)
-@OptIn(UnityAdsExperimental::class)
 class UnityAdsAdapterUtilsTest {
 
   private val context: Context = ApplicationProvider.getApplicationContext()

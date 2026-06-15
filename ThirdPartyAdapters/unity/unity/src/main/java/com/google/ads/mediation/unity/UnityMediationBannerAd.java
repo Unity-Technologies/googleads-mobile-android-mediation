@@ -40,13 +40,10 @@ import com.unity3d.ads.BannerSize;
 import com.unity3d.ads.InitializationListener;
 import com.unity3d.ads.LoadListener;
 import com.unity3d.ads.UnityAdsError;
-import com.unity3d.ads.UnityAdsExperimental;
-
 /**
  * The {@link UnityMediationBannerAd} is used to load Unity Banner ads and mediate the callbacks
  * between Google Mobile Ads SDK and Unity Ads SDK.
  */
-@UnityAdsExperimental
 @Keep
 public class UnityMediationBannerAd
         implements MediationBannerAd, LoadListener<BannerAd>, BannerShowListener {

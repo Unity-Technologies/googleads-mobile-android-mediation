@@ -28,6 +28,7 @@ import androidx.annotation.OptIn;
 
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdFormat;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.mediation.MediationConfiguration;
@@ -278,9 +279,9 @@ public class UnityAdsAdapterUtils {
   @OptIn(markerClass = UnityAdsExperimental.class)
   public static MediationInfo getMediationInfo() {
     return new MediationInfo(
-            ADMOB,           // Mediation name
-            UnityAds.getVersion(),       // Unity Ads SDK version
-            BuildConfig.ADAPTER_VERSION  // Adapter version
+            ADMOB,                              // Mediation name
+            MobileAds.getVersion().toString(),  // Google mediation SDK version
+            BuildConfig.ADAPTER_VERSION         // Adapter version
     );
   }
 }
