@@ -1,6 +1,8 @@
 ## AppLovin Android Mediation Adapter Changelog
 
-#### Next version
+#### Version 13.6.3.0 (In progress)
+
+#### Version 13.6.2.1 (In progress)
 - Filter age-restricted requests for AppLovin SDK when new `AgeRestrictedTreatment` is set to `CHILD`.
 
 #### Version 13.6.2.0

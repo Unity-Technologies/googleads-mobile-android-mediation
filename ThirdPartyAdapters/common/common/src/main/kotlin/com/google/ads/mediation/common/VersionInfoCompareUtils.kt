@@ -20,6 +20,7 @@ import com.google.android.gms.ads.VersionInfo
 object VersionInfoCompareUtils {
 
   /** Returns true iff version1 is greater than or equal to version2. */
+  @JvmStatic
   fun isVersionGreaterThanOrEqualTo(version1: VersionInfo, version2: VersionInfo): Boolean {
     if (version1.majorVersion > version2.majorVersion) {
       return true

@@ -1,0 +1,154 @@
+#  Copyright 2026 Google LLC
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+name: Mediation Adapters CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-paths:
+    runs-on: ubuntu-latest
+    outputs:
+      adapters_to_test: ${{ steps.filter.outputs.adapters_to_test }}
+      example: ${{ steps.filter.outputs.example }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check changes
+        id: filter
+        run: |
+          # Fetch base branch to compare
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # 1. Check if Example changed
+          if echo "$CHANGED_FILES" | grep -q "^Example/"; then
+            echo "example=true" >> $GITHUB_OUTPUT
+          else
+            echo "example=false" >> $GITHUB_OUTPUT
+          fi
+
+          # 2. Discover and filter adapters
+          NON_ADAPTERS="adaptertestkit common prerelease"
+          # TODO(b/519896882): Remove these directories once they are cleaned up on GitHub.
+          DEPRECATED_ADAPTERS="adcolony fyber nend tapjoy vungle"
+          ADAPTERS=$(ls -d ThirdPartyAdapters/*/ | sed 's/ThirdPartyAdapters\///' | sed 's/\///')
+
+          # Check for global changes (common utilities or workflow files themselves)
+          TEST_ALL=false
+          if echo "$CHANGED_FILES" | grep -q -E "^ThirdPartyAdapters/(common|adaptertestkit)/|^\.github/workflows/"; then
+            TEST_ALL=true
+          fi
+
+          is_non_adapter() {
+            local name=$1
+            for non_ad in $NON_ADAPTERS $DEPRECATED_ADAPTERS; do
+              if [ "$name" = "$non_ad" ]; then
+                return 0 # True
+              fi
+            done
+            return 1 # False
+          }
+
+          TEST_LIST=()
+          for adapter in $ADAPTERS; do
+            if ! is_non_adapter "$adapter"; then
+              if $TEST_ALL || echo "$CHANGED_FILES" | grep -q "^ThirdPartyAdapters/$adapter/"; then
+                TEST_LIST+=("$adapter")
+              fi
+            fi
+          done
+
+          # Convert to JSON array
+          if [ ${#TEST_LIST[@]} -eq 0 ]; then
+            JSON_ARRAY="[]"
+          else
+            JSON_ARRAY=$(python3 -c "import json, sys; print(json.dumps(sys.argv[1:]))" "${TEST_LIST[@]}")
+          fi
+          echo "adapters_to_test=$JSON_ARRAY" >> $GITHUB_OUTPUT
+
+  test-adapters:
+    needs: check-paths
+    if: ${{ needs.check-paths.outputs.adapters_to_test != '[]' }}
+    strategy:
+      matrix:
+        adapter: ${{ fromJson(needs.check-paths.outputs.adapters_to_test) }}
+    name: Test ${{ matrix.adapter }} Adapter
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Unit Tests
+        run: |
+          cd ThirdPartyAdapters/${{ matrix.adapter }}/
+          GRADLE_VERSION=$(sed -E -n 's/.*gradle-(.*)-(bin|all)\.zip/\1/p' gradle/wrapper/gradle-wrapper.properties)
+          GRADLE_MAJOR_VERSION="${GRADLE_VERSION%%.*}"
+          brew install gradle@$GRADLE_MAJOR_VERSION
+          brew link gradle@$GRADLE_MAJOR_VERSION
+          gradle wrapper --gradle-version $GRADLE_VERSION
+          ./gradlew test --scan
+
+  Build:
+    needs: check-paths
+    if: ${{ needs.check-paths.outputs.example == 'true' }}
+    name: Build
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build Example
+        run: |-
+          cd Example/
+          GRADLE_VERSION=$(sed -E -n 's/.*gradle-(.*)-(bin|all)\.zip/\1/p' gradle/wrapper/gradle-wrapper.properties)
+          GRADLE_MAJOR_VERSION="${GRADLE_VERSION%%.*}"
+          brew install gradle@$GRADLE_MAJOR_VERSION
+          brew link gradle@$GRADLE_MAJOR_VERSION
+          gradle wrapper --gradle-version $GRADLE_VERSION
+          ./gradlew build -P includeSnippets=true
+
+  all-checks-passed:
+    needs: [check-paths, test-adapters, Build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Status
+        run: |
+          if [[ "${{ needs.check-paths.result }}" == "failure" || "${{ needs.check-paths.result }}" == "cancelled" ]]; then
+            echo "check-paths failed or was cancelled."
+            exit 1
+          fi
+          if [[ "${{ needs.Build.result }}" == "failure" || "${{ needs.Build.result }}" == "cancelled" ]]; then
+            echo "Build failed or was cancelled."
+            exit 1
+          fi
+          if [[ "${{ needs.test-adapters.result }}" == "failure" || "${{ needs.test-adapters.result }}" == "cancelled" ]]; then
+            echo "test-adapters failed or was cancelled."
+            exit 1
+          fi
+          echo "All checks completed successfully or were skipped."

@@ -29,7 +29,7 @@ android {
             minSdk 23
         }
         targetSdk 33
-        versionCode 4180000
+        versionCode 4190000
         versionName stringVersion
         buildConfigField("String", "ADAPTER_VERSION", "\"${stringVersion}\"")
         android.buildFeatures.buildConfig true
@@ -49,6 +49,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
+        languageVersion = "1.9"
+        apiVersion = "1.9"
     }
     sourceSets {
         test.kotlin.srcDirs += 'src/test/kotlin'
@@ -124,9 +126,9 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.5.0'
     // Check for a 'useNextGenGma' flag to use the next generation GMA SDK.
     if (project.hasProperty('useNextGenGma')) {
-        implementation 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.0.1'
+        implementation 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.2.1'
     } else {
-        implementation 'com.google.android.gms:play-services-ads:25.2.0'
+        implementation 'com.google.android.gms:play-services-ads:25.3.0'
     }
 
     testImplementation 'androidx.core:core-ktx:1.8.0'
