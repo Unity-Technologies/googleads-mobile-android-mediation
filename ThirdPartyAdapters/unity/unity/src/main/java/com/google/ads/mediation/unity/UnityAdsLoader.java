@@ -35,7 +35,6 @@ class UnityAdsLoader {
         LoadListener<InterstitialAd> listener) {
 
       LoadConfiguration.Builder builder = new LoadConfiguration.Builder(placementId)
-        //.setObjectId(objectId)
         .withMediationInfo(getMediationInfo());
 
         if (adMarkup != null) {
