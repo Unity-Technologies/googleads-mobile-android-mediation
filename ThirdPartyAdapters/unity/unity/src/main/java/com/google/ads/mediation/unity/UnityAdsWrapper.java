@@ -2,16 +2,13 @@ package com.google.ads.mediation.unity;
 
 import static com.google.ads.mediation.unity.UnityAdsAdapterUtils.getMediationInfo;
 
-import androidx.annotation.OptIn;
 import com.unity3d.ads.IUnityAdsTokenListener;
 import com.unity3d.ads.InitializationConfiguration;
 import com.unity3d.ads.InitializationListener;
 import com.unity3d.ads.TokenConfiguration;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.UnityAdsExperimental;
 
 /** Wrapper class for {@link UnityAds} */
-@OptIn(markerClass = UnityAdsExperimental.class)
 class UnityAdsWrapper {
   public void initialize(String gameId, InitializationListener listener) {
     // Build InitializationConfiguration with mediation info

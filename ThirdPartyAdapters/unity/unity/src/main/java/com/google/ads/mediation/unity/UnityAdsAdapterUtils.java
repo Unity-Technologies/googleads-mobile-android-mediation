@@ -24,7 +24,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdFormat;
@@ -37,7 +36,6 @@ import com.unity3d.ads.BannerSize;
 import com.unity3d.ads.MediationInfo;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsError;
-import com.unity3d.ads.UnityAdsExperimental;
 import com.unity3d.ads.metadata.MetaData;
 import java.util.ArrayList;
 
@@ -72,7 +70,6 @@ public class UnityAdsAdapterUtils {
    * @param description the error message.
    * @return the {@link AdError} object.
    */
-  @OptIn(markerClass = UnityAdsExperimental.class)
   @NonNull
   static AdError createSDKInitializationError(
           @NonNull UnityAdsError unityAdsError, @NonNull String description) {
@@ -87,7 +84,6 @@ public class UnityAdsAdapterUtils {
    * @param description the error message.
    * @return the {@link AdError} object.
    */
-  @OptIn(markerClass = UnityAdsExperimental.class)
   @NonNull
   static AdError createSDKLoadError(
           @NonNull UnityAdsError unityAdsError, @NonNull String description) {
@@ -102,7 +98,6 @@ public class UnityAdsAdapterUtils {
    * @param description the error message.
    * @return the {@link AdError} object.
    */
-  @OptIn(markerClass = UnityAdsExperimental.class)
   @NonNull
   static AdError createSDKShowError(
           @NonNull UnityAdsError unityAdsError, @NonNull String description) {
@@ -127,7 +122,6 @@ public class UnityAdsAdapterUtils {
    * @param unityAdsError error object from Unity.
    * @return mediation specific load error code.
    */
-  @OptIn(markerClass = com.unity3d.ads.UnityAdsExperimental.class)
   static int getMediationInitializationErrorCode(@NonNull UnityAdsError unityAdsError) {
     switch (unityAdsError.getCode()) {
       case 2:
@@ -153,7 +147,6 @@ public class UnityAdsAdapterUtils {
    * @param unityAdsError error object from Unity.
    * @return mediation specific load error code.
    */
-  @OptIn(markerClass = com.unity3d.ads.UnityAdsExperimental.class)
   static int getMediationLoadErrorCode(@NonNull UnityAdsError unityAdsError) {
     switch (unityAdsError.getCode()) {
       case 52101: // Not initialized
@@ -183,7 +176,6 @@ public class UnityAdsAdapterUtils {
    * @param unityAdsError error object from Unity.
    * @return mediation specific load error code.
    */
-  @OptIn(markerClass = com.unity3d.ads.UnityAdsExperimental.class)
   static int getMediationShowErrorCode(@NonNull UnityAdsError unityAdsError) {
     switch (unityAdsError.getCode()) {
       case 52201: // already showing
@@ -200,7 +192,6 @@ public class UnityAdsAdapterUtils {
     return 500;
   }
 
-  @OptIn(markerClass = UnityAdsExperimental.class)
   @Nullable
   public static BannerSize getUnityBannerSize(
       @NonNull Context context,
@@ -276,7 +267,6 @@ public class UnityAdsAdapterUtils {
    *
    * @return MediationInfo object with Google mediation details
    */
-  @OptIn(markerClass = UnityAdsExperimental.class)
   public static MediationInfo getMediationInfo() {
     return new MediationInfo(
             ADMOB,                              // Mediation name

@@ -14,11 +14,9 @@
 
 package com.google.ads.mediation.unity;
 
-import androidx.annotation.OptIn;
 import androidx.annotation.VisibleForTesting;
 import com.unity3d.ads.InitializationListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.UnityAdsExperimental;
 
 /**
  * The {@link UnityInitializer} is used to initialize Unity ads
@@ -61,7 +59,6 @@ public class UnityInitializer {
    * @param gameId                 Unity Ads Game ID.
    * @param initializationListener Unity Ads Initialization listener.
    */
-  @OptIn(markerClass = UnityAdsExperimental.class)
   public void initializeUnityAds(String gameId, InitializationListener
       initializationListener) {
 

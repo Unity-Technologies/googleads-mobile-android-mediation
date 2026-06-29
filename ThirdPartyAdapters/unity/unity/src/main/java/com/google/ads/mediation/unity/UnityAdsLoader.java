@@ -2,7 +2,6 @@ package com.google.ads.mediation.unity;
 
 import static com.google.ads.mediation.unity.UnityAdsAdapterUtils.getMediationInfo;
 
-import androidx.annotation.OptIn;
 import com.unity3d.ads.BannerAd;
 import com.unity3d.ads.BannerConfiguration;
 import com.unity3d.ads.BannerShowListener;
@@ -11,12 +10,10 @@ import com.unity3d.ads.InterstitialAd;
 import com.unity3d.ads.LoadConfiguration;
 import com.unity3d.ads.LoadListener;
 import com.unity3d.ads.RewardedAd;
-import com.unity3d.ads.UnityAdsExperimental;
 
 /**
  * Wrapper class for UnityAds Ad loading and showing
  */
-@OptIn(markerClass = UnityAdsExperimental.class)
 class UnityAdsLoader {
 
 

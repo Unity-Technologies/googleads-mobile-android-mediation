@@ -23,7 +23,6 @@ import com.unity3d.ads.ShowConfiguration
 import com.unity3d.ads.ShowFinishState
 import com.unity3d.ads.UnityAds.UnityAdsLoadError
 import com.unity3d.ads.UnityAdsError
-import com.unity3d.ads.UnityAdsExperimental
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +40,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 
 @RunWith(AndroidJUnit4::class)
-@OptIn(UnityAdsExperimental::class)
 class UnityRewardedAdTest {
 
   // Subject of tests

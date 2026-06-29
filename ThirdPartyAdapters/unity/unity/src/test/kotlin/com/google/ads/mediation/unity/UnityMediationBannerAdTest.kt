@@ -13,7 +13,6 @@ import com.google.android.gms.ads.mediation.MediationBannerAdConfiguration
 import com.google.common.truth.Truth.assertThat
 import com.unity3d.ads.BannerAd
 import com.unity3d.ads.UnityAdsError
-import com.unity3d.ads.UnityAdsExperimental
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,7 +26,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 
 @RunWith(AndroidJUnit4::class)
-@OptIn(UnityAdsExperimental::class)
 class UnityMediationBannerAdTest {
   // Subject of tests
   private lateinit var unityMediationBannerAd: UnityMediationBannerAd

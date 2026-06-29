@@ -23,7 +23,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-import androidx.annotation.OptIn;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdFormat;
@@ -45,7 +44,6 @@ import com.google.android.gms.ads.mediation.rtb.RtbSignalData;
 import com.google.android.gms.ads.mediation.rtb.SignalCallbacks;
 import com.unity3d.ads.TokenConfiguration;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.UnityAdsExperimental;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -56,7 +54,6 @@ import java.util.List;
  * The {@link UnityMediationAdapter} is used to initialize the Unity Ads SDK, load rewarded video
  * ads from Unity Ads and mediate the callbacks between Google Mobile Ads SDK and Unity Ads SDK.
  */
-@OptIn(markerClass = UnityAdsExperimental.class)
 public class UnityMediationAdapter extends RtbAdapter {
 
   /**

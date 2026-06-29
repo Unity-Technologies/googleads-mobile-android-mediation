@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.mediation.MediationAdLoadCallback;
@@ -30,7 +29,6 @@ import com.unity3d.ads.LoadListener;
 import com.unity3d.ads.ShowConfiguration;
 import com.unity3d.ads.ShowFinishState;
 import com.unity3d.ads.UnityAdsError;
-import com.unity3d.ads.UnityAdsExperimental;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +38,6 @@ import java.util.UUID;
  * The {@link UnityInterstitialAd} is used to load Unity Interstitial ads and mediate the callbacks
  * between Google Mobile Ads SDK and Unity Ads SDK.
  */
-@OptIn(markerClass = UnityAdsExperimental.class)
 public class UnityInterstitialAd
     implements MediationInterstitialAd, LoadListener<InterstitialAd>, InterstitialShowListener {
 

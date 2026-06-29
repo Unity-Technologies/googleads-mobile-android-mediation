@@ -38,7 +38,6 @@ import com.unity3d.ads.IUnityAdsTokenListener
 import com.unity3d.ads.InitializationListener
 import com.unity3d.ads.TokenConfiguration
 import com.unity3d.ads.UnityAdsError
-import com.unity3d.ads.UnityAdsExperimental
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -60,7 +59,6 @@ import org.robolectric.Robolectric
 
 /** Unit tests for [UnityMediationAdapter] */
 @RunWith(AndroidJUnit4::class)
-@OptIn(UnityAdsExperimental::class)
 class UnityMediationAdapterTest {
 
   // Subject of tests
