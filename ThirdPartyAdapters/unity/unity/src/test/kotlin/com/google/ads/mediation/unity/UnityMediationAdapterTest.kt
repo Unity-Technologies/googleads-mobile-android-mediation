@@ -17,6 +17,7 @@ import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_INVALID_SERVER
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_INITIALIZATION_FAILURE
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_MISSING_PARAMETERS
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_NON_ACTIVITY
+import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_TOKEN_GENERATION_FAILED
 import com.google.ads.mediation.unity.UnityMediationAdapter.SDK_ERROR_DOMAIN
 import com.google.ads.mediation.unity.UnityMediationBannerAd.ERROR_MSG_INITIALIZATION_FAILED_FOR_GAME_ID
 import com.google.ads.mediation.unity.UnityMediationBannerAd.ERROR_MSG_NO_MATCHING_AD_SIZE
@@ -338,6 +339,54 @@ class UnityMediationAdapterTest {
     // GMA's rewarded interstitial format is mapped to Unity Ads's rewarded format.
     assertEquals(com.unity3d.ads.AdFormat.REWARDED, tokenConfigCaptor.firstValue.adFormat)
     verifyNoMoreInteractions(signalCallbacks)
+  }
+
+  @Test
+  fun collectSignals_whenSdkReturnsNullToken_routesToOnFailure() {
+    // Legacy SDK path: only onUnityAdsTokenReady is called, with null.
+    whenever(unityAdsWrapper.getToken(any(), any())) doAnswer
+      { invocation ->
+        val callback = invocation.arguments[1] as IUnityAdsTokenListener
+        callback.onUnityAdsTokenReady(null)
+      }
+
+    val rtbSignalData =
+      RtbSignalData(
+        activity,
+        listOf(MediationConfiguration(AdFormat.INTERSTITIAL, /* serverParameters= */ bundleOf())),
+        /* networkExtras= */ bundleOf(),
+        null,
+      )
+
+    unityMediationAdapter.collectSignals(rtbSignalData, signalCallbacks)
+
+    val adErrorCaptor = argumentCaptor<AdError>()
+    verify(signalCallbacks).onFailure(adErrorCaptor.capture())
+    assertEquals(ERROR_TOKEN_GENERATION_FAILED, adErrorCaptor.firstValue.code)
+    assertEquals(ADAPTER_ERROR_DOMAIN, adErrorCaptor.firstValue.domain)
+    verifyNoMoreInteractions(signalCallbacks)
+  }
+
+  @Test
+  fun collectSignals_whenSdkReturnsEmptyToken_routesToOnFailure() {
+    whenever(unityAdsWrapper.getToken(any(), any())) doAnswer
+      { invocation ->
+        val callback = invocation.arguments[1] as IUnityAdsTokenListener
+        callback.onUnityAdsTokenReady("")
+      }
+
+    val rtbSignalData =
+      RtbSignalData(
+        activity,
+        listOf(MediationConfiguration(AdFormat.INTERSTITIAL, /* serverParameters= */ bundleOf())),
+        /* networkExtras= */ bundleOf(),
+        null,
+      )
+
+    unityMediationAdapter.collectSignals(rtbSignalData, signalCallbacks)
+
+    verify(signalCallbacks).onFailure(any())
+    verify(signalCallbacks, never()).onSuccess(any())
   }
 
   @Test

@@ -44,6 +44,7 @@ import com.google.android.gms.ads.mediation.rtb.RtbAdapter;
 import com.google.android.gms.ads.mediation.rtb.RtbSignalData;
 import com.google.android.gms.ads.mediation.rtb.SignalCallbacks;
 import com.unity3d.ads.IUnityAdsInitializationListener;
+import com.unity3d.ads.IUnityAdsTokenListener;
 import com.unity3d.ads.TokenConfiguration;
 import com.unity3d.ads.UnityAds;
 import java.lang.annotation.Retention;
@@ -87,7 +88,8 @@ public class UnityMediationAdapter extends RtbAdapter {
           ERROR_UNITY_ADS_NOT_SUPPORTED,
           ERROR_FINISH,
           ERROR_BANNER_SIZE_MISMATCH,
-          ERROR_INITIALIZATION_FAILURE
+          ERROR_INITIALIZATION_FAILURE,
+          ERROR_TOKEN_GENERATION_FAILED
       })
   @interface AdapterError {
 
@@ -140,6 +142,9 @@ public class UnityMediationAdapter extends RtbAdapter {
    * UnityAds returned an initialization error.
    */
   static final int ERROR_INITIALIZATION_FAILURE = 111;
+
+  /** UnityAds returned no usable bidding token; routed to onFailure so the bidder skips Unity. */
+  static final int ERROR_TOKEN_GENERATION_FAILED = 112;
 
   static final String ERROR_MSG_MISSING_PARAMETERS = "Missing or invalid server parameters.";
 
@@ -228,24 +233,35 @@ public class UnityMediationAdapter extends RtbAdapter {
       Log.w(TAG, "Unsupported ad format for Unity Ads: " + adFormat);
     }
 
+    IUnityAdsTokenListener listener = new RoutingTokenListener(signalCallbacks);
     if (unityAdFormat != null) {
       TokenConfiguration tokenConfiguration = new TokenConfiguration(unityAdFormat);
-      unityAdsWrapper.getToken(
-          tokenConfiguration,
-          token -> {
-            if (token == null) {
-              token = "";
-            }
-            signalCallbacks.onSuccess(token);
-          });
+      unityAdsWrapper.getToken(tokenConfiguration, listener);
     } else {
-      unityAdsWrapper.getToken(
-          token -> {
-            if (token == null) {
-              token = "";
-            }
-            signalCallbacks.onSuccess(token);
-          });
+      unityAdsWrapper.getToken(listener);
+    }
+  }
+
+  /** Routes a null/empty token or a token failure to onFailure, invoking signalCallbacks once. */
+  @VisibleForTesting
+  static final class RoutingTokenListener implements IUnityAdsTokenListener {
+    private final SignalCallbacks signalCallbacks;
+
+    RoutingTokenListener(@NonNull SignalCallbacks signalCallbacks) {
+      this.signalCallbacks = signalCallbacks;
+    }
+
+    @Override
+    public void onUnityAdsTokenReady(String token) {
+      if (TextUtils.isEmpty(token)) {
+        signalCallbacks.onFailure(
+            new AdError(
+                ERROR_TOKEN_GENERATION_FAILED,
+                "Unity Ads returned a null or empty bidding token.",
+                ADAPTER_ERROR_DOMAIN));
+        return;
+      }
+      signalCallbacks.onSuccess(token);
     }
   }
 
