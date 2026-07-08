@@ -146,8 +146,6 @@ public class UnityMediationAdapter extends RtbAdapter {
   static final String ERROR_MSG_NON_ACTIVITY =
       "Unity Ads requires an Activity context to load ads.";
 
-  static final String ERROR_MSG_CONTEXT_NULL = "Activity context is null.";
-
   static final String ERROR_MSG_INITIALIZATION_FAILURE = "Unity Ads initialization failed: [%s] %s";
 
   /**
