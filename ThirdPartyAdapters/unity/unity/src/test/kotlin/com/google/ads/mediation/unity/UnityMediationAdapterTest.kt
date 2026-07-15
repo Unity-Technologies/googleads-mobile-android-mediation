@@ -12,11 +12,9 @@ import com.google.ads.mediation.unity.UnityInitializer.KEY_ADAPTER_VERSION
 import com.google.ads.mediation.unity.UnityInterstitialAd.ERROR_MSG_INTERSTITIAL_INITIALIZATION_FAILED
 import com.google.ads.mediation.unity.UnityMediationAdapter.ADAPTER_ERROR_DOMAIN
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_BANNER_SIZE_MISMATCH
-import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_CONTEXT_NOT_ACTIVITY
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_INVALID_SERVER_PARAMETERS
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_INITIALIZATION_FAILURE
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_MISSING_PARAMETERS
-import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_MSG_NON_ACTIVITY
 import com.google.ads.mediation.unity.UnityMediationAdapter.ERROR_TOKEN_GENERATION_FAILED
 import com.google.ads.mediation.unity.UnityMediationAdapter.SDK_ERROR_DOMAIN
 import com.google.ads.mediation.unity.UnityMediationBannerAd.ERROR_MSG_INITIALIZATION_FAILED_FOR_GAME_ID
@@ -219,7 +217,13 @@ class UnityMediationAdapterTest {
   }
 
   @Test
-  fun collectSignals_forBannerFormatAndNonActivityContext_fails() {
+  fun collectSignals_forBannerFormatAndNonActivityContext_invokesSignalCallbacks() {
+    whenever(unityAdsWrapper.getToken(any(), any())) doAnswer
+      { invocation ->
+        val callback = invocation.arguments[1] as IUnityAdsTokenListener
+        callback.onUnityAdsTokenReady(TEST_TOKEN)
+      }
+
     val rtbSignalData =
       RtbSignalData(
         nonActivityContext,
@@ -230,12 +234,7 @@ class UnityMediationAdapterTest {
 
     unityMediationAdapter.collectSignals(rtbSignalData, signalCallbacks)
 
-    val adErrorCaptor = argumentCaptor<AdError>()
-    verify(signalCallbacks).onFailure(adErrorCaptor.capture())
-    val adError = adErrorCaptor.firstValue
-    assertThat(adError.code).isEqualTo(ERROR_CONTEXT_NOT_ACTIVITY)
-    assertThat(adError.domain).isEqualTo(ADAPTER_ERROR_DOMAIN)
-    verifyNoMoreInteractions(signalCallbacks)
+    verify(signalCallbacks).onSuccess(TEST_TOKEN)
   }
 
   @Test
@@ -500,20 +499,17 @@ class UnityMediationAdapterTest {
   }
 
   @Test
-  fun loadBannerAd_withNonActivityContext_failsWithAdError() {
-    mediationBannerAdConfiguration = initializeBannerAd(ApplicationProvider.getApplicationContext())
+  fun loadBannerAd_withNonActivityContext_callsInitializeUnityAds() {
+    mediationBannerAdConfiguration = initializeBannerAd(nonActivityContext)
+    whenever(mediationUtils.findClosestSize(eq(nonActivityContext), eq(AdSize.BANNER), any())) doReturn
+      AdSize.BANNER
 
     unityMediationAdapter.loadBannerAd(
       mediationBannerAdConfiguration,
       mediationBannerAdLoadCallback,
     )
 
-    val adErrorCaptor = argumentCaptor<AdError>()
-    verify(mediationBannerAdLoadCallback).onFailure(adErrorCaptor.capture())
-    val capturedError = adErrorCaptor.firstValue
-    assertThat(capturedError.code).isEqualTo(ERROR_CONTEXT_NOT_ACTIVITY)
-    assertThat(capturedError.message).isEqualTo(ERROR_MSG_NON_ACTIVITY)
-    assertThat(capturedError.domain).isEqualTo(ADAPTER_ERROR_DOMAIN)
+    verify(unityInitializer).initializeUnityAds(any(), any(), any())
   }
 
   @Test
