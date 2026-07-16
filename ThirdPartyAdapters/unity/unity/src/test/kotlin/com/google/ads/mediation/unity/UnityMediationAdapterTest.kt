@@ -235,6 +235,7 @@ class UnityMediationAdapterTest {
     unityMediationAdapter.collectSignals(rtbSignalData, signalCallbacks)
 
     verify(signalCallbacks).onSuccess(TEST_TOKEN)
+    verifyNoMoreInteractions(signalCallbacks)
   }
 
   @Test
