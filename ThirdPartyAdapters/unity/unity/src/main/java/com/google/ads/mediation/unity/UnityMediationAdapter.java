@@ -82,7 +82,6 @@ public class UnityMediationAdapter extends RtbAdapter {
           ERROR_PLACEMENT_STATE_NO_FILL,
           ERROR_PLACEMENT_STATE_DISABLED,
           ERROR_NULL_CONTEXT,
-          ERROR_CONTEXT_NOT_ACTIVITY,
           ERROR_AD_NOT_READY,
           ERROR_UNITY_ADS_NOT_SUPPORTED,
           ERROR_FINISH,
@@ -114,9 +113,6 @@ public class UnityMediationAdapter extends RtbAdapter {
    */
   static final int ERROR_NULL_CONTEXT = 104;
 
-  /** Tried to load or show an ad with a non-Activity context. */
-  static final int ERROR_CONTEXT_NOT_ACTIVITY = 105;
-
   /**
    * Tried to show an ad that's not ready to be shown.
    */
@@ -146,7 +142,6 @@ public class UnityMediationAdapter extends RtbAdapter {
   static final int ERROR_TOKEN_GENERATION_FAILED = 112;
 
   static final String ERROR_MSG_MISSING_PARAMETERS = "Missing or invalid server parameters.";
-
 
   static final String ERROR_MSG_INITIALIZATION_FAILURE = "Unity Ads initialization failed: [%s] %s";
 
